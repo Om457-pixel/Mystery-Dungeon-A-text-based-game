@@ -24,8 +24,9 @@ python mystery_dungeon.py
 ```
 
 
-```memraid
 %% A simple flowchart explaining "How to Play" Mystery Dungeon
+
+```memraid
 
 graph TD
     A[Start Game] --> B[Enter Dungeon]
