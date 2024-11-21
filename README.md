@@ -59,4 +59,3 @@ graph TD;
     W -->|Leave| Y[Exit Dungeon Safely]
     X --> Z[Game Over or Win!]
     Y --> Z[Game Over (End of Adventure)]
-
