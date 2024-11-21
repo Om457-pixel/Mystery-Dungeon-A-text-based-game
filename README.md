@@ -1,6 +1,6 @@
 
 
-%% A simple flowchart explaining "How to Play" Mystery Dungeon
+
 
 ```memraid
 graph TD;
