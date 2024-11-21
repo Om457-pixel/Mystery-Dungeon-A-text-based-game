@@ -27,8 +27,7 @@ python mystery_dungeon.py
 %% A simple flowchart explaining "How to Play" Mystery Dungeon
 
 ```memraid
-
-graph TD
+graph TD;
     A[Start Game] --> B[Enter Dungeon]
     B --> C{Choose to Enter?}
     C -->|Yes| D[Meet Mysterious Guide]
