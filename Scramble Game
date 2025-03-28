@@ -1,0 +1,283 @@
+import random
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import ttk
+import tkinter.font as tkFont
+
+class WordScrambleGame:
+    def _init_(self, root):
+        self.root = root
+        self.root.title("Word Scramble Game")
+        self.root.geometry("600x700")
+        self.root.configure(bg="#1a1a1a")
+        self.root.resizable(False, False)
+        
+        self.words = ['loni', 'pizza', 'bottle', 'fight', 'freefire', 'pubg', 'mobile', 
+                      'computer', 'program', 'python', 'gaming', 'keyboard', 'mouse', 'screen']
+        self.current_word = ""
+        self.scrambled_word = ""
+        self.attempts = 3
+        self.score = 0
+        self.high_score = 0
+        self.hint_used = False
+        
+        self.setup_ui()
+        self.new_round()
+        
+    def setup_ui(self):
+ 
+        self.style = ttk.Style()
+        self.style.theme_use('clam')
+        
+
+        self.style.configure("TButton", 
+                            font=('Helvetica', 14, 'bold'),
+                            background="#FF4500",
+                            foreground="#FFFFFF")
+        
+        self.style.configure("Custom.TButton", 
+                            font=('Helvetica', 14, 'bold'),
+                            padding=15)
+        
+        self.style.map("Custom.TButton",
+                       background=[('active', '#FF6347'), ('pressed', '#B22222')],
+                       foreground=[('pressed', '#FFFFFF'), ('active', '#FFFFFF')])
+        
+        self.style.configure("Hint.TButton", 
+                            font=('Helvetica', 12, 'bold'),
+                            padding=10)
+                            
+        self.style.map("Hint.TButton",
+                       background=[('active', '#4682B4'), ('pressed', '#1E90FF')],
+                       foreground=[('pressed', '#FFFFFF'), ('active', '#FFFFFF')])
+        
+  
+        self.style.configure("Custom.TLabel", 
+                            font=('Helvetica', 14),
+                            background="#1a1a1a",
+                            foreground="white")
+        
+        self.style.configure("Title.TLabel",
+                            font=('Helvetica', 36, 'bold'),
+                            background="#1a1a1a",
+                            foreground="#FFD700")
+        
+        self.style.configure("Word.TLabel",
+                            font=('Helvetica', 48, 'bold'),
+                            background="#1a1a1a",
+                            foreground="#00FF00")
+        
+        self.style.configure("Stats.TLabel",
+                            font=('Helvetica', 18),
+                            background="#1a1a1a",
+                            foreground="#FFFFFF")
+        
+        self.style.configure("TFrame", background="#1a1a1a")
+        
+        main_frame = ttk.Frame(self.root, style="TFrame")
+        main_frame.pack(expand=True, fill="both", padx=30, pady=30)
+        
+
+        self.title_label = ttk.Label(
+            main_frame,
+            text="Word Scramble Game",
+            style="Title.TLabel"
+        )
+        self.title_label.pack(pady=20)
+        
+
+        stats_frame = ttk.Frame(main_frame, style="TFrame")
+        stats_frame.pack(fill="x", pady=20)
+        
+        self.score_label = ttk.Label(
+            stats_frame,
+            text=f"Score: {self.score}",
+            style="Stats.TLabel"
+        )
+        self.score_label.pack(side="left", padx=20)
+        
+        self.high_score_label = ttk.Label(
+            stats_frame,
+            text=f"High Score: {self.high_score}",
+            style="Stats.TLabel"
+        )
+        self.high_score_label.pack(side="left", padx=20)
+        
+        self.attempts_label = ttk.Label(
+            stats_frame,
+            text=f"Attempts: {self.attempts}",
+            style="Stats.TLabel"
+        )
+        self.attempts_label.pack(side="right", padx=20)
+        
+
+        game_frame = ttk.Frame(main_frame, style="TFrame")
+        game_frame.pack(expand=True, fill="both", pady=20)
+        
+        instruction_label = ttk.Label(
+            game_frame,
+            text="Unscramble the word below:",
+            style="Stats.TLabel"
+        )
+        instruction_label.pack(pady=10)
+        
+
+        word_display_frame = ttk.Frame(game_frame, style="TFrame")
+        word_display_frame.pack(pady=10)
+        
+        word_bg = tk.Canvas(word_display_frame, width=400, height=100, 
+                          bg="#333333", highlightthickness=0)
+        word_bg.pack()
+        
+        self.scrambled_label = ttk.Label(
+            word_display_frame,
+            text="",
+            style="Word.TLabel"
+        )
+        self.scrambled_label.place(relx=0.5, rely=0.5, anchor="center")
+        
+ 
+        entry_frame = ttk.Frame(game_frame, style="TFrame")
+        entry_frame.pack(pady=20)
+        
+        self.guess_entry = ttk.Entry(
+            entry_frame,
+            font=('Helvetica', 18),
+            width=20
+        )
+        self.guess_entry.pack(pady=5)
+        
+ 
+        self.hint_label = ttk.Label(
+            entry_frame,
+            text="",
+            style="Stats.TLabel",
+            foreground="#FFD700"
+        )
+        self.hint_label.pack(pady=5)
+        
+        # Buttons frame
+        button_frame = ttk.Frame(main_frame, style="TFrame")
+        button_frame.pack(fill="x", pady=10)
+        
+        # Create a distinctive button using custom Canvas instead of ttk
+        submit_btn_frame = ttk.Frame(button_frame, style="TFrame")
+        submit_btn_frame.pack(side="left", expand=True, padx=10)
+        
+        self.submit_button = tk.Button(
+            submit_btn_frame,
+            text="Submit Guess",
+            font=('Helvetica', 14, 'bold'),
+            bg="#FF4500",
+            fg="white",
+            activebackground="#FF6347",
+            activeforeground="white",
+            relief=tk.RAISED,
+            bd=3,
+            padx=20,
+            pady=10,
+            command=self.check_guess
+        )
+        self.submit_button.pack(fill="both", expand=True)
+        
+        new_word_btn_frame = ttk.Frame(button_frame, style="TFrame")
+        new_word_btn_frame.pack(side="right", expand=True, padx=10)
+        
+        self.new_word_button = tk.Button(
+            new_word_btn_frame,
+            text="New Word",
+            font=('Helvetica', 14, 'bold'),
+            bg="#4CAF50",
+            fg="white",
+            activebackground="#45a049",
+            activeforeground="white",
+            relief=tk.RAISED,
+            bd=3,
+            padx=20,
+            pady=10,
+            command=self.new_round
+        )
+        self.new_word_button.pack(fill="both", expand=True)
+        
+        # Hint button
+        hint_frame = ttk.Frame(main_frame, style="TFrame")
+        hint_frame.pack(fill="x", pady=10)
+        
+        self.hint_button = tk.Button(
+            hint_frame,
+            text="Get Hint",
+            font=('Helvetica', 12),
+            bg="#4682B4",
+            fg="white",
+            activebackground="#1E90FF",
+            activeforeground="white",
+            relief=tk.RAISED,
+            bd=2,
+            padx=10,
+            pady=5,
+            command=self.show_hint
+        )
+        self.hint_button.pack()
+        
+        self.guess_entry.bind('<Return>', lambda e: self.check_guess())
+        
+    def scramble_word(self, word):
+        word_list = list(word)
+        random.shuffle(word_list)
+        scrambled = ''.join(word_list)
+        
+        # Ensure the scrambled word is different from the original
+        while scrambled == word and len(word) > 1:
+            random.shuffle(word_list)
+            scrambled = ''.join(word_list)
+            
+        return scrambled
+        
+    def new_round(self):
+        self.current_word = random.choice(self.words)
+        self.scrambled_word = self.scramble_word(self.current_word)
+        self.attempts = 3
+        self.hint_used = False
+        
+        self.scrambled_label.config(text=self.scrambled_word)
+        self.attempts_label.config(text=f"Attempts: {self.attempts}")
+        self.hint_label.config(text="")
+        self.guess_entry.delete(0, tk.END)
+        self.guess_entry.focus()
+        
+    def show_hint(self):
+        if not self.hint_used:
+            hint_text = f"First letter: {self.current_word[0]}"
+            self.hint_label.config(text=hint_text)
+            self.hint_used = True
+        
+    def check_guess(self):
+        guess = self.guess_entry.get().lower()
+        
+        if not guess:
+            messagebox.showinfo("Empty Guess", "Please enter a word!")
+            return
+            
+        if guess == self.current_word:
+            self.score += 1
+            if self.score > self.high_score:
+                self.high_score = self.score
+                self.high_score_label.config(text=f"High Score: {self.high_score}")
+                
+            self.score_label.config(text=f"Score: {self.score}")
+            messagebox.showinfo("Success", "🎉 Congratulations! You guessed correctly! 🎉")
+            self.new_round()
+        else:
+            self.attempts -= 1
+            self.attempts_label.config(text=f"Attempts: {self.attempts}")
+            
+            if self.attempts == 0:
+                messagebox.showinfo("Game Over", f"😢 Sorry! The correct word was '{self.current_word}'")
+                self.new_round()
+            else:
+                messagebox.showwarning("Incorrect", "❌ Try again!")
+
+if _name_ == "_main_":
+    root = tk.Tk()
+    game = WordScrambleGame(root)
+    root.mainloop()
